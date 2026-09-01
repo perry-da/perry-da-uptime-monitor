@@ -20,6 +20,28 @@ import { classifyFetchError } from './classify';
 /** ISC-35: a distinct UA so target-site operators can identify/allowlist us. */
 export const USER_AGENT = 'UptimeMonitorBot/1.0 (+https://uptime-monitor.example)';
 
+/**
+ * Header name for the optional shared-secret bypass token (see `BYPASS_TOKEN`
+ * below). A fixed, documented name so target-site operators can write a WAF
+ * rule against it without needing per-monitor configuration.
+ */
+export const BYPASS_HEADER_NAME = 'x-uptime-monitor-key';
+
+/**
+ * Optional shared secret sent on every check request so a target site's own
+ * operator can allowlist *this* checker specifically (via a WAF rule keyed on
+ * the header value) without weakening bot protection for anyone else — safer
+ * than a User-Agent-based rule, which any client can send regardless of
+ * whether they're actually us. Unset by default; only attached when present,
+ * so sites relying on the plain User-Agent identification (ISC-35) are
+ * unaffected. Read lazily (not a module-level constant) so it reflects the
+ * environment at call time — both for testability and because Vercel can
+ * update env vars for an already-warm serverless instance.
+ */
+function bypassToken(): string | undefined {
+  return process.env.MONITOR_BYPASS_KEY;
+}
+
 /** ISC-33: default request budget in milliseconds (10 seconds). */
 export const DEFAULT_TIMEOUT_MS = 10_000;
 
@@ -88,11 +110,14 @@ export async function runHttpCheck(
     // Iterate MAX_REDIRECTS + 1 times: the first request plus up to
     // MAX_REDIRECTS follow-ups; a further redirect is a `down`/http overflow.
     for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+      const token = bypassToken();
       const response = await fetch(currentUrl, {
         method: 'GET',
         redirect: 'manual', // we count and follow hops ourselves
         signal: controller.signal,
-        headers: { 'user-agent': USER_AGENT },
+        headers: token
+          ? { 'user-agent': USER_AGENT, [BYPASS_HEADER_NAME]: token }
+          : { 'user-agent': USER_AGENT },
       });
 
       const status = response.status;
