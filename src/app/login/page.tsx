@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -34,33 +35,60 @@ export default function LoginPage() {
 
   if (done) {
     return (
-      <main>
-        <h1>Signed in</h1>
-        <p>The monitor dashboard is still being built — check back soon.</p>
-        <a href="/">Back home</a>
+      <main className="mx-auto flex max-w-md flex-col items-center px-6 py-28 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-yellow/25 text-3xl">✓</div>
+        <h1 className="mt-6 text-3xl font-extrabold tracking-tight text-ink">Signed in</h1>
+        <p className="mt-3 text-ink-soft">The monitor dashboard is still being built — check back soon.</p>
+        <Link href="/" className="mt-8 rounded-full bg-ink px-6 py-3 text-sm font-semibold text-white hover:bg-black">
+          Back home
+        </Link>
       </main>
     );
   }
 
   return (
-    <main>
-      <h1>Log in</h1>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Email
-          <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+    <main className="mx-auto flex max-w-md flex-col px-6 py-24">
+      <h1 className="text-3xl font-extrabold tracking-tight text-ink">Log in</h1>
+
+      <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+        <label className="block">
+          <span className="text-sm font-medium text-ink">Email</span>
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="mt-1.5 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-ink outline-none focus:border-ink"
+          />
         </label>
-        <label>
-          Password
-          <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+        <label className="block">
+          <span className="text-sm font-medium text-ink">Password</span>
+          <input
+            type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="mt-1.5 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-ink outline-none focus:border-ink"
+          />
         </label>
-        {error && <p role="alert">{error}</p>}
-        <button type="submit" disabled={submitting}>
+        {error && (
+          <p role="alert" className="rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-700">
+            {error}
+          </p>
+        )}
+        <button
+          type="submit"
+          disabled={submitting}
+          className="w-full rounded-full bg-ink px-6 py-3 text-sm font-semibold text-white transition hover:bg-black disabled:opacity-60"
+        >
           {submitting ? "Logging in…" : "Log in"}
         </button>
       </form>
-      <p>
-        No account yet? <a href="/signup">Sign up</a>
+      <p className="mt-6 text-sm text-ink-soft">
+        No account yet?{" "}
+        <Link href="/signup" className="font-semibold text-ink hover:underline">
+          Sign up
+        </Link>
       </p>
     </main>
   );
