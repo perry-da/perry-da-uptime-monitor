@@ -1,0 +1,25 @@
+name: Run monitor checks
+
+# Vercel Hobby's built-in cron is capped at once/day. This workflow pings the
+# same /api/cron/run-checks endpoint on a 5-minute cadence instead — GitHub
+# Actions' practical minimum granularity — as a free stand-in until the
+# project is on a plan with sub-daily cron.
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  run-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger check run
+        run: |
+          status=$(curl -s -o /tmp/response.json -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://perry-da-uptime-monitor-perry-da1.vercel.app/api/cron/run-checks")
+          cat /tmp/response.json
+          if [ "$status" -ge 300 ]; then
+            echo "Non-2xx response: $status"
+            exit 1
+          fi
