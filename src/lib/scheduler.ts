@@ -3,6 +3,8 @@ import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import * as schema from "@/db/schema";
 import { monitors, checks } from "@/db/schema";
 import { runHttpCheck } from "@/lib/checks/http";
+import { runPingCheck } from "@/lib/checks/ping";
+import { runTcpCheck } from "@/lib/checks/tcp";
 import type { CheckResult } from "@/lib/checks/types";
 import { evaluateIncidentTransition } from "@/lib/incidents";
 import type { EmailSender } from "@/lib/alerts/email-sender";
@@ -21,6 +23,8 @@ export interface ClaimedMonitor {
   accountId: string;
   type: (typeof monitors.$inferSelect)["type"];
   url: string | null;
+  hostname: string | null;
+  port: number | null;
   intervalSeconds: number;
 }
 
@@ -61,6 +65,8 @@ export async function claimDueMonitors(db: Db, batchSize = DEFAULT_BATCH_SIZE): 
       accountId: monitors.accountId,
       type: monitors.type,
       url: monitors.url,
+      hostname: monitors.hostname,
+      port: monitors.port,
       intervalSeconds: monitors.intervalSeconds,
     });
 
@@ -88,8 +94,16 @@ export async function runOneCheck(db: Db, monitor: ClaimedMonitor, emailSender?:
         if (!monitor.url) throw new Error("http monitor missing url");
         result = await runHttpCheck(monitor.url);
         break;
+      case "ping":
+        if (!monitor.hostname) throw new Error("ping monitor missing hostname");
+        result = await runPingCheck(monitor.hostname);
+        break;
+      case "tcp":
+        if (!monitor.hostname || !monitor.port) throw new Error("tcp monitor missing hostname/port");
+        result = await runTcpCheck(monitor.hostname, monitor.port);
+        break;
       default:
-        // ping/tcp/keyword/ssl executors are future Features (see ISA) — a monitor of
+        // keyword/ssl executors are still future Features (see ISA) — a monitor of
         // one of those types simply isn't checked yet, not a crash.
         return { monitorId: monitor.id, ok: true };
     }
