@@ -22,6 +22,7 @@ const COLUMNS: { title: string; links: { href: string; label: string }[] }[] = [
     links: [
       { href: "/login", label: "Log in" },
       { href: "/signup", label: "Sign up" },
+      { href: "/help", label: "Help & support" },
     ],
   },
 ];

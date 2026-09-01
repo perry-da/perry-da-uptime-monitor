@@ -5,7 +5,7 @@ import { checks, incidents, monitors } from "@/db/schema";
 import { getServerAccount } from "@/lib/session-server";
 import { scopedToAccount } from "@/lib/tenant";
 import { AddMonitorButton } from "@/components/dashboard/AddMonitorButton";
-import { MonitorList } from "@/components/dashboard/MonitorList";
+import { MonitorTabs } from "@/components/dashboard/MonitorTabs";
 import { IncidentBanner } from "@/components/dashboard/IncidentBanner";
 
 export const dynamic = "force-dynamic";
@@ -50,7 +50,7 @@ export default async function DashboardPage() {
       </div>
 
       <div className="mt-8">
-        <MonitorList items={monitorsWithLatestCheck} />
+        <MonitorTabs items={monitorsWithLatestCheck} />
       </div>
     </main>
   );
