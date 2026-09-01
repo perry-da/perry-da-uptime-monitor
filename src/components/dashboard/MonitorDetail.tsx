@@ -23,25 +23,51 @@ export function MonitorDetail({ monitor, checks: recentChecks }: { monitor: Moni
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  const [slug, setSlug] = useState(monitor.slug ?? "");
+  const [published, setPublished] = useState(monitor.published);
+  const [savingStatusPage, setSavingStatusPage] = useState(false);
+  const [statusPageError, setStatusPageError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
   const responseTimePoints = recentChecks
     .slice()
     .reverse()
     .map((c) => c.responseTimeMs)
     .filter((v): v is number => v != null);
 
-  async function patchMonitor(body: Record<string, unknown>) {
-    setError(null);
+  async function patchMonitor(body: Record<string, unknown>, onError: (msg: string) => void = setError) {
     const res = await fetch(`/api/monitors/${monitor.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
     if (!res.ok) {
-      setError("Update failed.");
+      const json = await res.json().catch(() => ({}));
+      onError(json.error === "slug_taken" ? "That link is already taken — try a different one." : "Update failed.");
       return false;
     }
     router.refresh();
     return true;
+  }
+
+  async function handleSaveStatusPage(e: React.FormEvent) {
+    e.preventDefault();
+    setStatusPageError(null);
+    if (published && !slug.trim()) {
+      setStatusPageError("Set a link before publishing.");
+      return;
+    }
+    setSavingStatusPage(true);
+    await patchMonitor({ slug: slug.trim() || undefined, published }, setStatusPageError);
+    setSavingStatusPage(false);
+  }
+
+  function copyStatusPageLink() {
+    const url = `${window.location.origin}/status/${slug}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   }
 
   async function handleSave(e: React.FormEvent) {
@@ -140,6 +166,46 @@ export function MonitorDetail({ monitor, checks: recentChecks }: { monitor: Moni
           </table>
         </div>
       </div>
+
+      {/* ISC-80: publish + copy status page link, now that StatusPages exists */}
+      <form onSubmit={handleSaveStatusPage} className="mt-8 space-y-4 rounded-2xl border border-gray-100 p-6">
+        <h2 className="text-sm font-semibold text-ink">Public status page</h2>
+        <label className="block">
+          <span className="text-sm font-medium text-ink">Link</span>
+          <div className="mt-1.5 flex items-center gap-2">
+            <span className="text-sm text-ink-soft">/status/</span>
+            <input
+              value={slug}
+              onChange={(e) => setSlug(e.target.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, "-"))}
+              placeholder="my-service"
+              className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-ink outline-none focus:border-ink"
+            />
+          </div>
+        </label>
+        <label className="flex items-center gap-2">
+          <input type="checkbox" checked={published} onChange={(e) => setPublished(e.target.checked)} />
+          <span className="text-sm text-ink">Published (publicly visible)</span>
+        </label>
+        {statusPageError && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{statusPageError}</p>}
+        <div className="flex gap-3">
+          <button
+            type="submit"
+            disabled={savingStatusPage}
+            className="rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-black disabled:opacity-60"
+          >
+            {savingStatusPage ? "Saving…" : "Save"}
+          </button>
+          {monitor.published && monitor.slug && (
+            <button
+              type="button"
+              onClick={copyStatusPageLink}
+              className="rounded-full border border-gray-300 px-5 py-2.5 text-sm font-semibold text-ink transition hover:border-gray-400"
+            >
+              {copied ? "Copied!" : "Copy public link"}
+            </button>
+          )}
+        </div>
+      </form>
 
       <form onSubmit={handleSave} className="mt-8 space-y-4 rounded-2xl border border-gray-100 p-6">
         <h2 className="text-sm font-semibold text-ink">Settings</h2>
