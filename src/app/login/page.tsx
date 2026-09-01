@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -23,27 +24,15 @@ export default function LoginPage() {
       const body = await res.json();
       if (!res.ok) {
         setError(body.error === "invalid_credentials" ? "Wrong email or password." : "Login failed.");
+        setSubmitting(false);
         return;
       }
-      setDone(true);
+      router.push("/dashboard"); // ISC-72-adjacent: the dashboard is real now, go straight there
+      router.refresh();
     } catch {
       setError("Network error — please try again.");
-    } finally {
       setSubmitting(false);
     }
-  }
-
-  if (done) {
-    return (
-      <main className="mx-auto flex max-w-md flex-col items-center px-6 py-28 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-yellow/25 text-3xl">✓</div>
-        <h1 className="mt-6 text-3xl font-extrabold tracking-tight text-ink">Signed in</h1>
-        <p className="mt-3 text-ink-soft">The monitor dashboard is still being built — check back soon.</p>
-        <Link href="/" className="mt-8 rounded-full bg-ink px-6 py-3 text-sm font-semibold text-white hover:bg-black">
-          Back home
-        </Link>
-      </main>
-    );
   }
 
   return (
