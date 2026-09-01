@@ -42,3 +42,5 @@ bun run build         # production build (requires DATABASE_URL to be *set*, not
 
 Target is Vercel. `vercel.json`/cron config for `/api/cron/run-checks` is not written yet —
 that ships with the Scheduler feature. See `ISA.md` Constraints for the deploy contract.
+
+<!-- deploy-trigger 1788294155449 -->
