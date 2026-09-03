@@ -1,7 +1,14 @@
 import Link from "next/link";
 
+const FEATURE_MENU = [
+  { href: "/features#http", icon: "🌐", title: "HTTP & HTTPS", desc: "Status code, response time, redirects." },
+  { href: "/features#ping", icon: "📡", title: "Ping", desc: "Is the host even reachable." },
+  { href: "/features#tcp", icon: "🔌", title: "TCP Port", desc: "Confirm a port is accepting connections." },
+  { href: "/features#keyword", icon: "🔑", title: "Keyword", desc: "Check the response body, not just the code." },
+  { href: "/features#ssl", icon: "🔒", title: "SSL Expiry", desc: "Get warned before a certificate lapses." },
+];
+
 const NAV_LINKS = [
-  { href: "/features", label: "Features" },
   { href: "/pricing", label: "Pricing" },
   { href: "/help", label: "Help" },
 ];
@@ -18,6 +25,40 @@ export function SiteHeader() {
         </Link>
 
         <nav className="hidden items-center gap-1 text-sm font-medium text-ink-soft md:flex">
+          <div className="group relative">
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 rounded-full px-4 py-2 transition hover:bg-gray-100 hover:text-ink"
+            >
+              Features
+              <svg
+                aria-hidden
+                viewBox="0 0 12 8"
+                className="h-2.5 w-2.5 fill-none stroke-current transition group-hover:rotate-180"
+              >
+                <path d="M1 1.5 6 6.5 11 1.5" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+            <div className="invisible absolute left-1/2 top-full w-80 -translate-x-1/2 pt-3 opacity-0 transition group-hover:visible group-hover:opacity-100">
+              <div className="grid gap-1 rounded-2xl border border-gray-100 bg-white p-3 shadow-xl">
+                {FEATURE_MENU.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex items-start gap-3 rounded-xl p-2.5 transition hover:bg-gray-50"
+                  >
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/20 text-lg">
+                      {item.icon}
+                    </span>
+                    <span>
+                      <span className="block text-sm font-semibold text-ink">{item.title}</span>
+                      <span className="block text-xs text-ink-soft">{item.desc}</span>
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
