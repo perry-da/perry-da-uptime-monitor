@@ -5,6 +5,8 @@ import { useState } from "react";
 import Link from "next/link";
 import type { monitors, checks } from "@/db/schema";
 import { ResponseTimeChart } from "@/components/dashboard/ResponseTimeChart";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 
 type Monitor = typeof monitors.$inferSelect;
 type Check = typeof checks.$inferSelect;
@@ -43,7 +45,7 @@ export function MonitorDetail({ monitor, checks: recentChecks }: { monitor: Moni
     });
     if (!res.ok) {
       const json = await res.json().catch(() => ({}));
-      onError(json.error === "slug_taken" ? "That link is already taken — try a different one." : "Update failed.");
+      onError(json.error === "slug_taken" ? "That link is already taken. Try a different one." : "Update failed.");
       return false;
     }
     router.refresh();
@@ -99,8 +101,8 @@ export function MonitorDetail({ monitor, checks: recentChecks }: { monitor: Moni
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
-      <Link href="/dashboard" className="text-sm text-ink-soft hover:text-ink">
-        ← Back to monitors
+      <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-ink-soft hover:text-ink">
+        <FontAwesomeIcon icon={faArrowLeft} className="h-3 w-3" /> Back to monitors
       </Link>
 
       <div className="mt-4 flex items-start justify-between">
@@ -145,7 +147,7 @@ export function MonitorDetail({ monitor, checks: recentChecks }: { monitor: Moni
               {recentChecks.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-4 py-6 text-center text-ink-soft">
-                    No checks yet — the first one runs on the next scheduled tick.
+                    No checks yet. The first one runs on the next scheduled tick.
                   </td>
                 </tr>
               ) : (
@@ -157,8 +159,8 @@ export function MonitorDetail({ monitor, checks: recentChecks }: { monitor: Moni
                         {c.status}
                       </span>
                     </td>
-                    <td className="px-4 py-2 text-ink-soft">{c.responseTimeMs != null ? `${c.responseTimeMs}ms` : "—"}</td>
-                    <td className="px-4 py-2 text-ink-soft">{c.failureReason ?? "—"}</td>
+                    <td className="px-4 py-2 text-ink-soft">{c.responseTimeMs != null ? `${c.responseTimeMs}ms` : "N/A"}</td>
+                    <td className="px-4 py-2 text-ink-soft">{c.failureReason ?? "N/A"}</td>
                   </tr>
                 ))
               )}

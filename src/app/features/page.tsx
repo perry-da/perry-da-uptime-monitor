@@ -1,33 +1,35 @@
 import Link from "next/link";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGlobe, faSatelliteDish, faPlug, faKey, faLock } from "@fortawesome/free-solid-svg-icons";
 
 const FEATURES = [
   {
     id: "http",
-    icon: "🌐",
+    icon: faGlobe,
     title: "HTTP & HTTPS monitoring",
     desc: "We GET your URL on the interval you set, follow redirects up to 5 hops, and record status code, response time, and exactly what went wrong when it doesn't come back clean.",
   },
   {
     id: "ping",
-    icon: "📡",
+    icon: faSatelliteDish,
     title: "Ping monitoring",
-    desc: "For anything that doesn't speak HTTP — is the host even reachable on the network.",
+    desc: "For anything that doesn't speak HTTP: is the host even reachable on the network.",
   },
   {
     id: "tcp",
-    icon: "🔌",
+    icon: faPlug,
     title: "TCP port checks",
-    desc: "Database, mail server, custom service — if it listens on a port, we can confirm it's accepting connections.",
+    desc: "Database, mail server, custom service: if it listens on a port, we can confirm it's accepting connections.",
   },
   {
     id: "keyword",
-    icon: "🔑",
+    icon: faKey,
     title: "Keyword monitoring",
     desc: "A 200 response isn't always a healthy page. We check the response body actually contains the text you expect.",
   },
   {
     id: "ssl",
-    icon: "🔒",
+    icon: faLock,
     title: "SSL expiry monitoring",
     desc: "Certificate expiry is a silent outage waiting to happen. We warn you weeks before it lapses, not the day of.",
   },
@@ -36,7 +38,7 @@ const FEATURES = [
 const CAPABILITIES = [
   {
     title: "Debounced alerts, not noise",
-    desc: "One transient blip doesn't page you. Two consecutive failures spanning a real time window does — the same signal a human would trust.",
+    desc: "One transient blip doesn't page you. Two consecutive failures spanning a real time window does. That's the same signal a human would trust.",
   },
   {
     title: "Recovery notifications",
@@ -44,7 +46,7 @@ const CAPABILITIES = [
   },
   {
     title: "Public status pages",
-    desc: "Publish a clean, read-only status page for any monitor — the link your customers check before they email you.",
+    desc: "Publish a clean, read-only status page for any monitor: the link your customers check before they email you.",
   },
   {
     title: "Webhooks",
@@ -63,7 +65,7 @@ export default function FeaturesPage() {
         </h1>
         <p className="mx-auto mt-6 max-w-xl text-lg text-ink-soft">
           Five check types, real debounced alerting, and a status page you can actually
-          share — all live in under a minute.
+          share, all live in under a minute.
         </p>
       </section>
 
@@ -71,8 +73,8 @@ export default function FeaturesPage() {
         <div className="grid grid-cols-1 gap-16 sm:grid-cols-2">
           {FEATURES.map((f, i) => (
             <div key={f.id} id={f.id} className={i % 2 === 1 ? "sm:mt-16" : ""}>
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/20 text-3xl">
-                {f.icon}
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/20 text-2xl text-brand-dark">
+                <FontAwesomeIcon icon={f.icon} />
               </div>
               <h2 className="mt-5 text-2xl font-bold text-ink">{f.title}</h2>
               <p className="mt-2 text-ink-soft">{f.desc}</p>

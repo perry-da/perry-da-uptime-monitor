@@ -67,14 +67,14 @@ export default async function StatusPage({ params }: { params: Promise<{ slug: s
             {data.openIncidents.map((incident) => (
               <li key={incident.startedAt} className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm">
                 <span className="font-semibold text-red-700">Ongoing</span>{" "}
-                <span className="text-ink-soft">— started {new Date(incident.startedAt).toLocaleString()}</span>
+                <span className="text-ink-soft">Started {new Date(incident.startedAt).toLocaleString()}</span>
               </li>
             ))}
             {data.closedIncidents.map((incident) => (
               <li key={incident.startedAt} className="rounded-xl border border-gray-100 px-4 py-3 text-sm">
                 <span className="font-semibold text-ink">Resolved</span>{" "}
                 <span className="text-ink-soft">
-                  — {new Date(incident.startedAt).toLocaleString()}, down for{" "}
+                  {new Date(incident.startedAt).toLocaleString()}, down for{" "}
                   {Math.round(incident.durationSeconds / 60)} min
                 </span>
               </li>

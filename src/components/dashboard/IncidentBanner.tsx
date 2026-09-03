@@ -23,7 +23,7 @@ export function IncidentBanner({ openIncidents, monitors: allMonitors }: { openI
               <Link href={`/dashboard/monitors/${incident.monitorId}`} className="underline hover:no-underline">
                 {monitor?.name ?? "Unknown monitor"}
               </Link>{" "}
-              — down since {new Date(incident.startedAt).toLocaleString()}
+              down since {new Date(incident.startedAt).toLocaleString()}
             </li>
           );
         })}

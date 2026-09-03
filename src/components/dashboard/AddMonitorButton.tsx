@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { MonitorForm, type MonitorFormValues } from "@/components/dashboard/MonitorForm";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
 
 const DEFAULT_VALUES: MonitorFormValues = {
   type: "http",
@@ -43,7 +45,7 @@ export function AddMonitorButton() {
       setOpen(false);
       router.refresh();
     } catch {
-      setError("Network error — please try again.");
+      setError("Network error. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -63,7 +65,7 @@ export function AddMonitorButton() {
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-bold text-ink">Add monitor</h2>
               <button onClick={() => setOpen(false)} className="text-ink-soft hover:text-ink" aria-label="Close">
-                ✕
+                <FontAwesomeIcon icon={faXmark} />
               </button>
             </div>
             <div className="mt-4">

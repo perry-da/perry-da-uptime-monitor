@@ -56,7 +56,7 @@ export function MonitorList({ items }: { items: { monitor: Monitor; latestCheck:
                 <StatusBadge monitor={monitor} latestCheck={latestCheck} />
               </td>
               <td className="px-5 py-4 text-ink-soft">
-                {latestCheck?.responseTimeMs != null ? `${latestCheck.responseTimeMs}ms` : "—"}
+                {latestCheck?.responseTimeMs != null ? `${latestCheck.responseTimeMs}ms` : "N/A"}
               </td>
               <td className="px-5 py-4 text-ink-soft">
                 {latestCheck ? new Date(latestCheck.checkedAt).toLocaleString() : "Never"}

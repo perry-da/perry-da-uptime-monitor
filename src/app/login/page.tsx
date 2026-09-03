@@ -30,7 +30,7 @@ export default function LoginPage() {
       router.push("/dashboard"); // ISC-72-adjacent: the dashboard is real now, go straight there
       router.refresh();
     } catch {
-      setError("Network error — please try again.");
+      setError("Network error. Please try again.");
       setSubmitting(false);
     }
   }

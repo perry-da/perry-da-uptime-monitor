@@ -1,11 +1,13 @@
 import Link from "next/link";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGlobe, faSatelliteDish, faPlug, faKey, faLock, faCircle, faCheck } from "@fortawesome/free-solid-svg-icons";
 
 const MONITOR_TYPES = [
-  { icon: "🌐", name: "HTTP & HTTPS", desc: "Status code, response time, redirect chains." },
-  { icon: "📡", name: "Ping", desc: "Is the host even reachable." },
-  { icon: "🔌", name: "TCP Port", desc: "Check any port on any host is accepting connections." },
-  { icon: "🔑", name: "Keyword", desc: "Confirm a page still contains the text it should." },
-  { icon: "🔒", name: "SSL Expiry", desc: "Get warned weeks before a certificate lapses." },
+  { icon: faGlobe, name: "HTTP & HTTPS", desc: "Status code, response time, redirect chains." },
+  { icon: faSatelliteDish, name: "Ping", desc: "Is the host even reachable." },
+  { icon: faPlug, name: "TCP Port", desc: "Check any port on any host is accepting connections." },
+  { icon: faKey, name: "Keyword", desc: "Confirm a page still contains the text it should." },
+  { icon: faLock, name: "SSL Expiry", desc: "Get warned weeks before a certificate lapses." },
 ];
 
 const STEPS = [
@@ -29,7 +31,7 @@ export default function LandingPage() {
         />
         <div className="relative mx-auto max-w-6xl px-6 py-24 text-center sm:py-32">
           <span className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-1.5 text-sm font-medium text-ink-soft shadow-sm">
-            ⬤ Free while you're getting started
+            <FontAwesomeIcon icon={faCircle} className="h-2 w-2 text-ink-soft" /> Free while you're getting started
           </span>
           <h1 className="mt-8 text-5xl font-extrabold tracking-tight text-ink sm:text-6xl">
             Know the instant your site
@@ -38,14 +40,14 @@ export default function LandingPage() {
           </h1>
           <p className="mx-auto mt-6 max-w-xl text-lg text-ink-soft">
             Add a URL, get alerted before your customers notice. HTTP, ping, TCP,
-            keyword, and SSL-expiry monitoring — set up in under a minute.
+            keyword, and SSL-expiry monitoring, set up in under a minute.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <Link
               href="/signup"
               className="rounded-full bg-ink px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-ink/10 transition hover:bg-black"
             >
-              Start free — it takes 60 seconds
+              Start free in 60 seconds
             </Link>
             <Link
               href="/features"
@@ -57,7 +59,7 @@ export default function LandingPage() {
           <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm font-medium text-ink-soft">
             {["5 check types", "No credit card", "Live in under 60s", "Free public status pages"].map((item) => (
               <span key={item} className="inline-flex items-center gap-2">
-                <span className="text-brand">✓</span> {item}
+                <FontAwesomeIcon icon={faCheck} className="h-3 w-3 text-brand" /> {item}
               </span>
             ))}
           </div>
@@ -78,8 +80,8 @@ export default function LandingPage() {
               key={m.name}
               className="rounded-2xl border border-gray-100 bg-white p-6 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-md"
             >
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand/20 text-2xl">
-                {m.icon}
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand/20 text-xl text-brand-dark">
+                <FontAwesomeIcon icon={m.icon} />
               </div>
               <h3 className="mt-4 font-semibold text-ink">{m.name}</h3>
               <p className="mt-1 text-sm text-ink-soft">{m.desc}</p>
@@ -114,7 +116,7 @@ export default function LandingPage() {
             That&rsquo;s the only feature that matters, and it&rsquo;s the one thing this
             actually does.&rdquo;
           </p>
-          <p className="mt-6 text-sm font-medium text-ink-soft">— every engineer who's been paged by a customer first</p>
+          <p className="mt-6 text-sm font-medium text-ink-soft">Every engineer who's been paged by a customer first</p>
         </div>
       </section>
 

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircle } from "@fortawesome/free-solid-svg-icons";
 
 const COLUMNS: { title: string; links: { href: string; label: string }[] }[] = [
   {
@@ -34,13 +36,13 @@ export function SiteFooter() {
         <div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
           <div className="col-span-2 sm:col-span-1">
             <div className="flex items-center gap-2 text-base font-extrabold text-footer-ink">
-              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-brand text-xs font-black text-footer-bg">
-                ⬤
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-brand text-xs text-footer-bg">
+                <FontAwesomeIcon icon={faCircle} className="h-2.5 w-2.5" />
               </span>
               Uptime Monitor
             </div>
             <p className="mt-3 max-w-[22ch] text-sm text-footer-ink-soft">
-              Know the instant your site goes down — before your customers do.
+              Know the instant your site goes down, before your customers do.
             </p>
           </div>
 

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheck } from "@fortawesome/free-solid-svg-icons";
 
 const TIERS = [
   {
@@ -18,7 +20,7 @@ const TIERS = [
   },
   {
     name: "Pro",
-    price: "—",
+    price: "TBD",
     period: "coming soon",
     tagline: "Faster check intervals, team seats, and priority alerting.",
     features: [
@@ -36,7 +38,7 @@ const TIERS = [
 const FAQ = [
   {
     q: "Is the free tier actually free?",
-    a: "Yes — up to 50 monitors, no credit card, no trial countdown. This is the whole product today.",
+    a: "Yes, up to 50 monitors, no credit card, no trial countdown. This is the whole product today.",
   },
   {
     q: "What happens when Pro launches?",
@@ -85,7 +87,9 @@ export default function PricingPage() {
               <ul className="mt-8 space-y-3">
                 {tier.features.map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm">
-                    <span className={tier.highlighted ? "text-brand" : "text-brand-dark"}>✓</span>
+                    <span className={tier.highlighted ? "text-brand" : "text-brand-dark"}>
+                      <FontAwesomeIcon icon={faCheck} className="h-3 w-3" />
+                    </span>
                     <span className={tier.highlighted ? "text-white/90" : "text-ink-soft"}>{f}</span>
                   </li>
                 ))}
