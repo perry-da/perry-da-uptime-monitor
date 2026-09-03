@@ -17,9 +17,13 @@ export function SiteHeader() {
           Uptime Monitor
         </Link>
 
-        <nav className="hidden items-center gap-8 text-sm font-medium text-ink-soft md:flex">
+        <nav className="hidden items-center gap-1 text-sm font-medium text-ink-soft md:flex">
           {NAV_LINKS.map((link) => (
-            <Link key={link.href} href={link.href} className="transition hover:text-ink">
+            <Link
+              key={link.href}
+              href={link.href}
+              className="rounded-full px-4 py-2 transition hover:bg-gray-100 hover:text-ink"
+            >
               {link.label}
             </Link>
           ))}
@@ -28,13 +32,13 @@ export function SiteHeader() {
         <div className="flex items-center gap-3">
           <Link
             href="/login"
-            className="hidden text-sm font-semibold text-ink-soft transition hover:text-ink sm:inline-block"
+            className="hidden rounded-full border border-gray-300 px-5 py-2.5 text-sm font-semibold text-ink transition hover:border-gray-400 sm:inline-block"
           >
             Log in
           </Link>
           <Link
             href="/signup"
-            className="rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-black"
+            className="rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-black"
           >
             Start free
           </Link>

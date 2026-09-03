@@ -46,7 +46,7 @@ export function SiteFooter() {
 
           {COLUMNS.map((col) => (
             <div key={col.title}>
-              <h3 className="text-sm font-semibold text-ink">{col.title}</h3>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-ink-soft">{col.title}</h3>
               <ul className="mt-3 space-y-2">
                 {col.links.map((link) => (
                   <li key={link.href}>
@@ -60,8 +60,8 @@ export function SiteFooter() {
           ))}
         </div>
 
-        <div className="mt-12 border-t border-gray-200 pt-6 text-xs text-ink-soft">
-          © {new Date().getFullYear()} Uptime Monitor.
+        <div className="mt-12 flex flex-col gap-2 border-t border-gray-200 pt-6 text-xs text-ink-soft sm:flex-row sm:items-center sm:justify-between">
+          <span>© {new Date().getFullYear()} Uptime Monitor. All rights reserved.</span>
         </div>
       </div>
     </footer>
