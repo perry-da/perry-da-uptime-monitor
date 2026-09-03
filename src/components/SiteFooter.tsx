@@ -34,7 +34,7 @@ export function SiteFooter() {
         <div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
           <div className="col-span-2 sm:col-span-1">
             <div className="flex items-center gap-2 text-base font-extrabold text-ink">
-              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-brand-yellow text-xs font-black">
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-brand text-xs font-black">
                 ⬤
               </span>
               Uptime Monitor

@@ -85,7 +85,7 @@ export default function PricingPage() {
               <ul className="mt-8 space-y-3">
                 {tier.features.map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm">
-                    <span className={tier.highlighted ? "text-brand-yellow" : "text-brand-yellow-dark"}>✓</span>
+                    <span className={tier.highlighted ? "text-brand" : "text-brand-dark"}>✓</span>
                     <span className={tier.highlighted ? "text-white/90" : "text-ink-soft"}>{f}</span>
                   </li>
                 ))}
@@ -95,7 +95,7 @@ export default function PricingPage() {
                 className={
                   "mt-10 block rounded-full px-6 py-3 text-center text-sm font-semibold transition " +
                   (tier.highlighted
-                    ? "bg-brand-yellow text-ink hover:bg-brand-yellow-dark"
+                    ? "bg-brand text-ink hover:bg-brand-dark"
                     : "border border-gray-300 text-ink hover:border-gray-400")
                 }
               >

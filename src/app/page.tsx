@@ -21,20 +21,20 @@ export default function LandingPage() {
       <section className="relative overflow-hidden bg-cream">
         <div
           aria-hidden
-          className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-brand-yellow/30 blur-3xl"
+          className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-brand/25 blur-3xl"
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute -left-32 bottom-0 h-72 w-72 rounded-full bg-brand-yellow/20 blur-3xl"
+          className="pointer-events-none absolute -left-32 bottom-0 h-72 w-72 rounded-full bg-brand/15 blur-3xl"
         />
         <div className="relative mx-auto max-w-6xl px-6 py-24 text-center sm:py-32">
           <span className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-1.5 text-sm font-medium text-ink-soft shadow-sm">
             ⬤ Free while you're getting started
           </span>
           <h1 className="mt-8 text-5xl font-extrabold tracking-tight text-ink sm:text-6xl">
-            Know the instant
+            Know the instant your site
             <br />
-            your site goes down
+            goes <span className="text-brand">down</span>
           </h1>
           <p className="mx-auto mt-6 max-w-xl text-lg text-ink-soft">
             Add a URL, get alerted before your customers notice. HTTP, ping, TCP,
@@ -54,6 +54,13 @@ export default function LandingPage() {
               See how it works
             </Link>
           </div>
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm font-medium text-ink-soft">
+            {["5 check types", "No credit card", "Live in under 60s", "Free public status pages"].map((item) => (
+              <span key={item} className="inline-flex items-center gap-2">
+                <span className="text-brand">✓</span> {item}
+              </span>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -71,7 +78,7 @@ export default function LandingPage() {
               key={m.name}
               className="rounded-2xl border border-gray-100 bg-white p-6 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-md"
             >
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-yellow/25 text-2xl">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand/20 text-2xl">
                 {m.icon}
               </div>
               <h3 className="mt-4 font-semibold text-ink">{m.name}</h3>
@@ -90,7 +97,7 @@ export default function LandingPage() {
           <div className="mt-16 grid grid-cols-1 gap-12 sm:grid-cols-3">
             {STEPS.map((step) => (
               <div key={step.n}>
-                <div className="text-5xl font-black text-brand-yellow">{step.n}</div>
+                <div className="text-5xl font-black text-brand">{step.n}</div>
                 <h3 className="mt-4 text-xl font-semibold">{step.title}</h3>
                 <p className="mt-2 text-white/70">{step.desc}</p>
               </div>
@@ -101,7 +108,7 @@ export default function LandingPage() {
 
       {/* Social-proof style stat block */}
       <section className="mx-auto max-w-6xl px-6 py-24">
-        <div className="rounded-3xl bg-brand-yellow/15 px-8 py-16 text-center sm:px-16">
+        <div className="rounded-3xl bg-brand/10 px-8 py-16 text-center sm:px-16">
           <p className="text-2xl font-semibold leading-relaxed text-ink sm:text-3xl">
             &ldquo;The whole point of monitoring is finding out before your customers do.
             That&rsquo;s the only feature that matters, and it&rsquo;s the one thing this

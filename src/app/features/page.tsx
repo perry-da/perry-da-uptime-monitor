@@ -71,7 +71,7 @@ export default function FeaturesPage() {
         <div className="grid grid-cols-1 gap-16 sm:grid-cols-2">
           {FEATURES.map((f, i) => (
             <div key={f.id} id={f.id} className={i % 2 === 1 ? "sm:mt-16" : ""}>
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-yellow/25 text-3xl">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/20 text-3xl">
                 {f.icon}
               </div>
               <h2 className="mt-5 text-2xl font-bold text-ink">{f.title}</h2>
