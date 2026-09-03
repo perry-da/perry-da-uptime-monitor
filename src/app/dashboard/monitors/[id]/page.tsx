@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { checks, monitors } from "@/db/schema";
@@ -8,8 +8,8 @@ import { MonitorDetail } from "@/components/dashboard/MonitorDetail";
 export const dynamic = "force-dynamic";
 
 export default async function MonitorDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const account = await getServerAccount();
-  if (!account) redirect("/login"); // ISC-81
+  // Auth is enforced by dashboard/layout.tsx; getServerAccount() here is guaranteed non-null.
+  const account = (await getServerAccount())!;
 
   const { id } = await params;
   const monitor = await db.query.monitors.findFirst({

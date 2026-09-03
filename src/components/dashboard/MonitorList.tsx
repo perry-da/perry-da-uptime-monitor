@@ -21,6 +21,13 @@ function targetOf(monitor: Monitor): string {
   return monitor.url ?? monitor.hostname ?? "";
 }
 
+function initialsOf(name: string): string {
+  const [first, second] = name.trim().split(/\s+/).filter(Boolean);
+  if (!first) return "?";
+  if (!second) return first.slice(0, 2).toUpperCase();
+  return (first.charAt(0) + second.charAt(0)).toUpperCase();
+}
+
 export function MonitorList({ items }: { items: { monitor: Monitor; latestCheck: Check | null }[] }) {
   if (items.length === 0) {
     return (
@@ -45,11 +52,21 @@ export function MonitorList({ items }: { items: { monitor: Monitor; latestCheck:
           {items.map(({ monitor, latestCheck }) => (
             <tr key={monitor.id} className="transition hover:bg-cream/60">
               <td className="px-5 py-4">
-                <Link href={`/dashboard/monitors/${monitor.id}`} className="font-semibold text-ink hover:underline">
-                  {monitor.name}
-                </Link>
-                <div className="text-xs text-ink-soft">
-                  {monitor.type} · {targetOf(monitor)}
+                <div className="flex items-center gap-3">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/20 text-xs font-bold text-brand-dark">
+                    {initialsOf(monitor.name)}
+                  </span>
+                  <div>
+                    <Link
+                      href={`/dashboard/monitors/${monitor.id}`}
+                      className="font-semibold text-ink hover:underline"
+                    >
+                      {monitor.name}
+                    </Link>
+                    <div className="text-xs text-ink-soft">
+                      {monitor.type} · {targetOf(monitor)}
+                    </div>
+                  </div>
                 </div>
               </td>
               <td className="px-5 py-4">
