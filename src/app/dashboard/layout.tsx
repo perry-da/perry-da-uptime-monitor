@@ -5,6 +5,7 @@ import { monitors } from "@/db/schema";
 import { getServerAccount } from "@/lib/session-server";
 import { scopedToAccount } from "@/lib/tenant";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
+import { DashboardShell } from "@/components/dashboard/DashboardShell";
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const account = await getServerAccount();
@@ -16,11 +17,8 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     .where(scopedToAccount(monitors.accountId, account.id));
 
   return (
-    <div className="flex min-h-screen">
-      <div className="sticky top-0 h-screen shrink-0">
-        <DashboardSidebar email={account.email} monitorCount={accountMonitors.length} />
-      </div>
-      <div className="min-w-0 flex-1 bg-cream">{children}</div>
-    </div>
+    <DashboardShell sidebar={<DashboardSidebar email={account.email} monitorCount={accountMonitors.length} />}>
+      {children}
+    </DashboardShell>
   );
 }
