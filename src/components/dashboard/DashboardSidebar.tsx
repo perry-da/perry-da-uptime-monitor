@@ -8,7 +8,7 @@ export function DashboardSidebar({ email, monitorCount }: { email: string; monit
   const initial = email.trim().charAt(0).toUpperCase() || "?";
 
   return (
-    <aside className="flex w-56 shrink-0 flex-col bg-ink text-white">
+    <aside className="flex h-full w-56 shrink-0 flex-col bg-ink text-white">
       <div className="flex items-center gap-2 px-5 py-5 text-base font-extrabold tracking-tight">
         <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-brand text-xs text-ink">
           <FontAwesomeIcon icon={faCircle} className="h-2.5 w-2.5" />
