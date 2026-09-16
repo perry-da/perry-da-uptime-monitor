@@ -3,6 +3,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { checks, monitors } from "@/db/schema";
 import { getServerAccount } from "@/lib/session-server";
+import { getDnsTimeline } from "@/lib/dns-tracking";
 import { MonitorDetail } from "@/components/dashboard/MonitorDetail";
 
 export const dynamic = "force-dynamic";
@@ -25,5 +26,7 @@ export default async function MonitorDetailPage({ params }: { params: Promise<{ 
     .orderBy(desc(checks.checkedAt))
     .limit(50);
 
-  return <MonitorDetail monitor={monitor} checks={recentChecks} />;
+  const dnsTimeline = monitor.type === "dns" ? await getDnsTimeline(db, monitor.id) : [];
+
+  return <MonitorDetail monitor={monitor} checks={recentChecks} dnsTimeline={dnsTimeline} />;
 }

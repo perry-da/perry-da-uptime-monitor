@@ -47,13 +47,21 @@ const sslFields = z.object({
   ...base,
 });
 
-// ISC-20: discriminated union rejects any type outside the 5 supported values.
+// DNS record-change tracking monitor (see ISA Decisions, 2026-09-16).
+const dnsFields = z.object({
+  type: z.literal("dns"),
+  hostname: z.string().min(1).max(255),
+  ...base,
+});
+
+// ISC-20: discriminated union rejects any type outside the 6 supported values.
 export const createMonitorSchema = z.discriminatedUnion("type", [
   httpFields,
   pingFields,
   tcpFields,
   keywordFields,
   sslFields,
+  dnsFields,
 ]);
 
 export type CreateMonitorInput = z.infer<typeof createMonitorSchema>;

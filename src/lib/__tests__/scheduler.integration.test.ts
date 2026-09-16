@@ -210,6 +210,34 @@ describe("runOneCheck (ISC-45, ISC-48)", () => {
     expect(row[0]!.status).toBe("down");
   });
 
+  it("dispatches a real dns check through the scheduler and records the timeline", async () => {
+    const { monitor } = await seedMonitor({ type: "dns", url: null, hostname: "example.com", intervalSeconds: 60 });
+    const result = await runOneCheck(db, {
+      id: monitor.id,
+      accountId: monitor.accountId,
+      type: "dns",
+      url: null,
+      hostname: "example.com",
+      port: null,
+      keyword: null,
+      sslExpiryWarningDays: 14,
+      intervalSeconds: 60,
+    });
+    expect(result.ok).toBe(true);
+
+    const row = await db.select().from(schema.checks).where(eq(schema.checks.monitorId, monitor.id));
+    expect(row.length).toBe(1);
+    expect(row[0]!.status).toBe("up");
+
+    // dns dispatch does more than the standard checks-row insert — confirm the
+    // snapshot/change history was actually written, not just the checks row.
+    const snapshots = await db
+      .select()
+      .from(schema.dnsSnapshots)
+      .where(eq(schema.dnsSnapshots.monitorId, monitor.id));
+    expect(snapshots.length).toBeGreaterThan(0);
+  });
+
   it("does not abort on a monitor with a bad target — records failure, releases claim (ISC-48)", async () => {
     const { monitor } = await seedMonitor({ url: "not-a-valid-url", intervalSeconds: 60 });
     const result = await runOneCheck(db, {

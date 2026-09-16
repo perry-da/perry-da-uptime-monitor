@@ -22,6 +22,13 @@
       "when": 1788213840008,
       "tag": "0002_complete_elektra",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1789600526017,
+      "tag": "0003_aspiring_patch",
+      "breakpoints": true
     }
   ]
 }

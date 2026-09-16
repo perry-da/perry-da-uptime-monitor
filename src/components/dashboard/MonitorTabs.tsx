@@ -17,6 +17,7 @@ const TABS = [
   { key: "tcp", label: "TCP" },
   { key: "keyword", label: "Keyword" },
   { key: "ssl", label: "SSL" },
+  { key: "dns", label: "DNS" },
 ] as const;
 
 type TabKey = (typeof TABS)[number]["key"];
@@ -36,6 +37,7 @@ export function MonitorTabs({ items }: { items: Item[] }) {
     tcp: 0,
     keyword: 0,
     ssl: 0,
+    dns: 0,
   };
   for (const item of items) counts[item.monitor.type] += 1;
 

@@ -3,19 +3,39 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
-import type { monitors, checks } from "@/db/schema";
+import type { monitors, checks, dnsChanges } from "@/db/schema";
 import { ResponseTimeChart } from "@/components/dashboard/ResponseTimeChart";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 
 type Monitor = typeof monitors.$inferSelect;
 type Check = typeof checks.$inferSelect;
+type DnsChange = typeof dnsChanges.$inferSelect;
+
+/** `null` on a change's very first-ever snapshot for that record type — nothing to compare against yet. */
+function formatDnsValues(json: string | null): string {
+  if (json === null) return "(none)";
+  try {
+    const values: string[] = JSON.parse(json);
+    return values.length === 0 ? "(no records)" : values.join(", ");
+  } catch {
+    return json;
+  }
+}
 
 function targetOf(monitor: Monitor): string {
   return monitor.url ?? (monitor.hostname ? `${monitor.hostname}${monitor.port ? ":" + monitor.port : ""}` : "");
 }
 
-export function MonitorDetail({ monitor, checks: recentChecks }: { monitor: Monitor; checks: Check[] }) {
+export function MonitorDetail({
+  monitor,
+  checks: recentChecks,
+  dnsTimeline = [],
+}: {
+  monitor: Monitor;
+  checks: Check[];
+  dnsTimeline?: DnsChange[];
+}) {
   const router = useRouter();
   const [name, setName] = useState(monitor.name);
   const [intervalSeconds, setIntervalSeconds] = useState(monitor.intervalSeconds);
@@ -127,6 +147,46 @@ export function MonitorDetail({ monitor, checks: recentChecks }: { monitor: Moni
           <h2 className="text-sm font-semibold text-ink">Response time</h2>
           <div className="mt-4">
             <ResponseTimeChart points={responseTimePoints} />
+          </div>
+        </div>
+      )}
+
+      {monitor.type === "dns" && (
+        <div className="mt-8 rounded-2xl border border-gray-100 p-6">
+          <h2 className="text-sm font-semibold text-ink">DNS timeline</h2>
+          <p className="mt-1 text-xs text-ink-soft">
+            Every detected change in this domain&rsquo;s A, AAAA, MX, TXT, NS, and CNAME records. Changes are
+            logged only — they never trigger an alert.
+          </p>
+          <div className="mt-4 overflow-hidden rounded-xl border border-gray-100">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-cream text-xs font-semibold uppercase tracking-wide text-ink-soft">
+                <tr>
+                  <th className="px-4 py-2">Detected</th>
+                  <th className="px-4 py-2">Record</th>
+                  <th className="px-4 py-2">Old value</th>
+                  <th className="px-4 py-2">New value</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {dnsTimeline.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="px-4 py-6 text-center text-ink-soft">
+                      No changes recorded yet.
+                    </td>
+                  </tr>
+                ) : (
+                  dnsTimeline.map((change) => (
+                    <tr key={change.id}>
+                      <td className="px-4 py-2 text-ink-soft">{new Date(change.detectedAt).toLocaleString()}</td>
+                      <td className="px-4 py-2 font-medium text-ink">{change.recordType}</td>
+                      <td className="px-4 py-2 text-ink-soft">{formatDnsValues(change.oldValues)}</td>
+                      <td className="px-4 py-2 text-ink-soft">{formatDnsValues(change.newValues)}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       )}

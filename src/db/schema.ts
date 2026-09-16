@@ -20,6 +20,19 @@ export const monitorTypeEnum = pgEnum("monitor_type", [
   "tcp",
   "keyword",
   "ssl",
+  "dns",
+]);
+
+// Record types tracked by a "dns" monitor. Distinct from `failureReasonEnum`'s
+// `dns` member below (that one means "DNS resolution failed during an HTTP
+// check" — an unrelated, pre-existing concept).
+export const dnsRecordTypeEnum = pgEnum("dns_record_type", [
+  "A",
+  "AAAA",
+  "MX",
+  "TXT",
+  "NS",
+  "CNAME",
 ]);
 
 export const checkStatusEnum = pgEnum("check_status", ["up", "down"]);
@@ -128,6 +141,43 @@ export const checks = pgTable("checks", {
   accountIdx: index("checks_account_idx").on(t.accountId),
 }));
 
+// ── DNS snapshots ────────────────────────────────────────────────────────────
+// One row per record type per "dns"-type check. `values` is a JSON-stringified,
+// sorted array of resolved values (sorted so semantically-identical answers in
+// a different order — DNS makes no ordering guarantee — never register as a
+// spurious "change"). Kept append-only, same as `checks`: the most recent row
+// per (monitor_id, record_type) is the current snapshot; older rows are the
+// history the diff logic in `lib/dns-tracking.ts` compares against.
+export const dnsSnapshots = pgTable("dns_snapshots", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  monitorId: uuid("monitor_id").notNull().references(() => monitors.id, { onDelete: "cascade" }),
+  recordType: dnsRecordTypeEnum("record_type").notNull(),
+  values: text("values").notNull(),
+  checkedAt: timestamp("checked_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  monitorRecordCheckedIdx: index("dns_snapshots_monitor_record_checked_idx").on(
+    t.monitorId,
+    t.recordType,
+    t.checkedAt,
+  ),
+}));
+
+// ── DNS changes (the "timeline") ─────────────────────────────────────────────
+// One row per detected diff between two consecutive snapshots for the same
+// (monitor_id, record_type). Log-only per this feature's scope — a DNS
+// record change never opens an incident or sends an alert; this table exists
+// purely so a human can review what changed and when.
+export const dnsChanges = pgTable("dns_changes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  monitorId: uuid("monitor_id").notNull().references(() => monitors.id, { onDelete: "cascade" }),
+  recordType: dnsRecordTypeEnum("record_type").notNull(),
+  oldValues: text("old_values"), // null for the very first snapshot ever recorded — not a "change"
+  newValues: text("new_values").notNull(),
+  detectedAt: timestamp("detected_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  monitorDetectedIdx: index("dns_changes_monitor_detected_idx").on(t.monitorId, t.detectedAt),
+}));
+
 // ── Incidents (ISC-51..62) ──────────────────────────────────────────────────
 export const incidents = pgTable("incidents", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -163,10 +213,20 @@ export const monitorsRelations = relations(monitors, ({ one, many }) => ({
   account: one(accounts, { fields: [monitors.accountId], references: [accounts.id] }),
   checks: many(checks),
   incidents: many(incidents),
+  dnsSnapshots: many(dnsSnapshots),
+  dnsChanges: many(dnsChanges),
 }));
 
 export const checksRelations = relations(checks, ({ one }) => ({
   monitor: one(monitors, { fields: [checks.monitorId], references: [monitors.id] }),
+}));
+
+export const dnsSnapshotsRelations = relations(dnsSnapshots, ({ one }) => ({
+  monitor: one(monitors, { fields: [dnsSnapshots.monitorId], references: [monitors.id] }),
+}));
+
+export const dnsChangesRelations = relations(dnsChanges, ({ one }) => ({
+  monitor: one(monitors, { fields: [dnsChanges.monitorId], references: [monitors.id] }),
 }));
 
 export const incidentsRelations = relations(incidents, ({ one }) => ({

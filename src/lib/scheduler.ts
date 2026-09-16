@@ -7,6 +7,7 @@ import { runPingCheck } from "@/lib/checks/ping";
 import { runTcpCheck } from "@/lib/checks/tcp";
 import { runKeywordCheck } from "@/lib/checks/keyword";
 import { runSslCheck } from "@/lib/checks/ssl";
+import { runDnsCheckAndRecordHistory } from "@/lib/dns-tracking";
 import type { CheckResult } from "@/lib/checks/types";
 import { evaluateIncidentTransition } from "@/lib/incidents";
 import type { EmailSender } from "@/lib/alerts/email-sender";
@@ -115,6 +116,14 @@ export async function runOneCheck(db: Db, monitor: ClaimedMonitor, emailSender?:
       case "ssl":
         if (!monitor.hostname) throw new Error("ssl monitor missing hostname");
         result = await runSslCheck(monitor.hostname, { warningDays: monitor.sslExpiryWarningDays });
+        break;
+      case "dns":
+        // Also persists the snapshot + any detected record changes (the "DNS
+        // timeline") — a DNS monitor's own `checks` row status/failureReason
+        // still comes back through the same `result` variable below, but
+        // this dispatch does strictly more than the others.
+        if (!monitor.hostname) throw new Error("dns monitor missing hostname");
+        result = await runDnsCheckAndRecordHistory(db, monitor.id, monitor.hostname);
         break;
       default:
         // Exhaustive over the monitor_type enum — every branch above is a real

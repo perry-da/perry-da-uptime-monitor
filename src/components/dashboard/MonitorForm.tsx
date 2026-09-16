@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export type MonitorType = "http" | "ping" | "tcp" | "keyword" | "ssl";
+export type MonitorType = "http" | "ping" | "tcp" | "keyword" | "ssl" | "dns";
 
 export interface MonitorFormValues {
   type: MonitorType;
@@ -34,7 +34,10 @@ function validate(values: MonitorFormValues): Record<string, string> {
   if ((values.type === "http" || values.type === "keyword") && !isValidUrl(values.url)) {
     errors.url = "Enter a valid URL, including https://.";
   }
-  if ((values.type === "ping" || values.type === "tcp" || values.type === "ssl") && !values.hostname.trim()) {
+  if (
+    (values.type === "ping" || values.type === "tcp" || values.type === "ssl" || values.type === "dns") &&
+    !values.hostname.trim()
+  ) {
     errors.hostname = "Hostname is required.";
   }
   if (values.type === "tcp") {
@@ -90,6 +93,7 @@ export function MonitorForm({
           <option value="tcp">TCP Port</option>
           <option value="keyword">Keyword</option>
           <option value="ssl">SSL Expiry</option>
+          <option value="dns">DNS</option>
         </select>
       </label>
 
@@ -115,7 +119,7 @@ export function MonitorForm({
         </label>
       )}
 
-      {(values.type === "ping" || values.type === "tcp" || values.type === "ssl") && (
+      {(values.type === "ping" || values.type === "tcp" || values.type === "ssl" || values.type === "dns") && (
         <label className="block">
           <span className="text-sm font-medium text-ink">Hostname</span>
           <input
