@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { createServer } from "node:net";
+import { createServer as createHttpServer } from "node:http";
 import * as schema from "../../db/schema";
 import { claimDueMonitors, runOneCheck, runDueChecks } from "../scheduler";
 
@@ -93,25 +94,6 @@ describe("claimDueMonitors (ISC-44, ISC-50)", () => {
 });
 
 describe("runOneCheck (ISC-45, ISC-48)", () => {
-  it("passes through still-unimplemented monitor types (keyword/ssl) without a network call or a crash", async () => {
-    // keyword/ssl executors are still future Features (see ISA Features section) — the
-    // scheduler must not crash on them, just skip actually checking them. Now that ping and
-    // tcp are real (see the dedicated dispatch tests below), keyword is the pass-through
-    // case that exercises runOneCheck's dispatch + claim-release logic without a live
-    // network dependency.
-    const { monitor } = await seedMonitor({ type: "keyword", url: null, keyword: "x", intervalSeconds: 120 });
-    const result = await runOneCheck(db, {
-      id: monitor.id,
-      accountId: monitor.accountId,
-      type: "keyword",
-      url: null,
-      hostname: null,
-      port: null,
-      intervalSeconds: monitor.intervalSeconds,
-    });
-    expect(result.ok).toBe(true);
-  });
-
   it("dispatches a real ping check through the scheduler (ISC-36 wiring)", async () => {
     // The scheduler's ping dispatch always uses ping.ts's default probe ports (443, 80) —
     // it doesn't accept a port override at this call site (that's ping.ts's own testing
@@ -126,6 +108,8 @@ describe("runOneCheck (ISC-45, ISC-48)", () => {
       url: null,
       hostname: "127.0.0.1",
       port: null,
+      keyword: null,
+      sslExpiryWarningDays: 14,
       intervalSeconds: 60,
     });
     expect(result.ok).toBe(true);
@@ -151,6 +135,8 @@ describe("runOneCheck (ISC-45, ISC-48)", () => {
         url: null,
         hostname: "127.0.0.1",
         port,
+        keyword: null,
+        sslExpiryWarningDays: 14,
         intervalSeconds: 60,
       });
       expect(result.ok).toBe(true);
@@ -162,6 +148,68 @@ describe("runOneCheck (ISC-45, ISC-48)", () => {
     }
   });
 
+  it("dispatches a real keyword check through the scheduler (ISC-38 wiring)", async () => {
+    const server = createHttpServer((_req, res) => {
+      res.writeHead(200, { "content-type": "text/plain" });
+      res.end("healthy site, all systems go");
+    });
+    const port = await new Promise<number>((resolve) => {
+      server.listen(0, "127.0.0.1", () => {
+        const addr = server.address();
+        if (addr && typeof addr === "object") resolve(addr.port);
+      });
+    });
+    try {
+      const { monitor } = await seedMonitor({
+        type: "keyword",
+        url: `http://127.0.0.1:${port}`,
+        keyword: "all systems go",
+        intervalSeconds: 60,
+      });
+      const result = await runOneCheck(db, {
+        id: monitor.id,
+        accountId: monitor.accountId,
+        type: "keyword",
+        url: `http://127.0.0.1:${port}`,
+        hostname: null,
+        port: null,
+        keyword: "all systems go",
+        sslExpiryWarningDays: 14,
+        intervalSeconds: 60,
+      });
+      expect(result.ok).toBe(true);
+      const row = await db.select().from(schema.checks).where(eq(schema.checks.monitorId, monitor.id));
+      expect(row.length).toBe(1);
+      expect(row[0]!.status).toBe("up");
+    } finally {
+      server.close();
+    }
+  });
+
+  it("dispatches a real ssl check through the scheduler (ISC-40/43 wiring)", async () => {
+    // The scheduler's ssl dispatch always connects on ssl.ts's default port 443 (SSL
+    // monitors have no port field, per monitor-schema.ts) — nothing should be listening
+    // on 127.0.0.1:443 in this sandbox, so this exercises the real dispatch + connection
+    // -failure path through runOneCheck. A genuine up/cert_expiring_soon outcome against
+    // an actual certificate is covered directly in ssl.test.ts.
+    const { monitor } = await seedMonitor({ type: "ssl", url: null, hostname: "127.0.0.1", intervalSeconds: 60 });
+    const result = await runOneCheck(db, {
+      id: monitor.id,
+      accountId: monitor.accountId,
+      type: "ssl",
+      url: null,
+      hostname: "127.0.0.1",
+      port: null,
+      keyword: null,
+      sslExpiryWarningDays: 14,
+      intervalSeconds: 60,
+    });
+    expect(result.ok).toBe(true);
+    const row = await db.select().from(schema.checks).where(eq(schema.checks.monitorId, monitor.id));
+    expect(row.length).toBe(1);
+    expect(row[0]!.status).toBe("down");
+  });
+
   it("does not abort on a monitor with a bad target — records failure, releases claim (ISC-48)", async () => {
     const { monitor } = await seedMonitor({ url: "not-a-valid-url", intervalSeconds: 60 });
     const result = await runOneCheck(db, {
@@ -171,6 +219,8 @@ describe("runOneCheck (ISC-45, ISC-48)", () => {
       url: "not-a-valid-url", // runHttpCheck will throw on invalid URL construction
       hostname: null,
       port: null,
+      keyword: null,
+      sslExpiryWarningDays: 14,
       intervalSeconds: 60,
     });
     // Whatever happens inside runHttpCheck, runOneCheck itself must not throw.
@@ -181,14 +231,16 @@ describe("runOneCheck (ISC-45, ISC-48)", () => {
   });
 
   it("clamps next_check_at to now() when the check itself runs longer than the interval", async () => {
-    const { monitor } = await seedMonitor({ intervalSeconds: 1 }); // 1s interval, trivially exceeded
+    const { monitor } = await seedMonitor({ url: null, intervalSeconds: 1 }); // 1s interval, trivially exceeded
     await runOneCheck(db, {
       id: monitor.id,
       accountId: monitor.accountId,
-      type: "keyword", // pass-through, but exercise the same anchoring code path via timing
+      type: "http", // missing url throws immediately — exercises the catch-branch anchoring path
       url: null,
       hostname: null,
       port: null,
+      keyword: null,
+      sslExpiryWarningDays: 14,
       intervalSeconds: 1,
     });
     const row = await db.query.monitors.findFirst({ where: eq(schema.monitors.id, monitor.id) });
@@ -199,7 +251,7 @@ describe("runOneCheck (ISC-45, ISC-48)", () => {
 
 describe("runDueChecks batch behavior (ISC-47, ISC-48)", () => {
   it("a single monitor's failure does not prevent siblings in the same batch from completing", async () => {
-    const { monitor: goodMonitor } = await seedMonitor({ type: "keyword", url: null, keyword: "x" });
+    const { monitor: goodMonitor } = await seedMonitor({ type: "ping", url: null, hostname: "127.0.0.1" });
     const { monitor: badMonitor } = await seedMonitor({ type: "http", url: "not-a-valid-url" });
 
     const results = await runDueChecks(db);

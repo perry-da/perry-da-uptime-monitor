@@ -77,4 +77,13 @@ export interface CheckResult {
 
   /** When the check started, for ordering and history (`checked_at`). */
   checkedAt: Date;
+
+  /**
+   * SSL monitor only: the certificate's `not_after` expiry date, recorded on
+   * every check regardless of outcome (ISC-40) — present whether the cert is
+   * still comfortably valid, expiring soon, or already expired, absent for
+   * every other monitor type and for SSL checks that never reached a
+   * handshake (DNS/connection failure — there is no certificate to report).
+   */
+  certExpiresAt?: Date;
 }

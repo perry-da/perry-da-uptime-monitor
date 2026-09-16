@@ -5,6 +5,8 @@ import { monitors, checks } from "@/db/schema";
 import { runHttpCheck } from "@/lib/checks/http";
 import { runPingCheck } from "@/lib/checks/ping";
 import { runTcpCheck } from "@/lib/checks/tcp";
+import { runKeywordCheck } from "@/lib/checks/keyword";
+import { runSslCheck } from "@/lib/checks/ssl";
 import type { CheckResult } from "@/lib/checks/types";
 import { evaluateIncidentTransition } from "@/lib/incidents";
 import type { EmailSender } from "@/lib/alerts/email-sender";
@@ -25,6 +27,8 @@ export interface ClaimedMonitor {
   url: string | null;
   hostname: string | null;
   port: number | null;
+  keyword: string | null;
+  sslExpiryWarningDays: number;
   intervalSeconds: number;
 }
 
@@ -67,6 +71,8 @@ export async function claimDueMonitors(db: Db, batchSize = DEFAULT_BATCH_SIZE): 
       url: monitors.url,
       hostname: monitors.hostname,
       port: monitors.port,
+      keyword: monitors.keyword,
+      sslExpiryWarningDays: monitors.sslExpiryWarningDays,
       intervalSeconds: monitors.intervalSeconds,
     });
 
@@ -102,9 +108,18 @@ export async function runOneCheck(db: Db, monitor: ClaimedMonitor, emailSender?:
         if (!monitor.hostname || !monitor.port) throw new Error("tcp monitor missing hostname/port");
         result = await runTcpCheck(monitor.hostname, monitor.port);
         break;
+      case "keyword":
+        if (!monitor.url || !monitor.keyword) throw new Error("keyword monitor missing url/keyword");
+        result = await runKeywordCheck(monitor.url, monitor.keyword);
+        break;
+      case "ssl":
+        if (!monitor.hostname) throw new Error("ssl monitor missing hostname");
+        result = await runSslCheck(monitor.hostname, { warningDays: monitor.sslExpiryWarningDays });
+        break;
       default:
-        // keyword/ssl executors are still future Features (see ISA) — a monitor of
-        // one of those types simply isn't checked yet, not a crash.
+        // Exhaustive over the monitor_type enum — every branch above is a real
+        // executor now. This default only guards against a future enum value
+        // reaching here before its executor is wired up.
         return { monitorId: monitor.id, ok: true };
     }
 
@@ -115,6 +130,7 @@ export async function runOneCheck(db: Db, monitor: ClaimedMonitor, emailSender?:
       statusCode: result.statusCode,
       responseTimeMs: result.responseTimeMs,
       failureReason: result.failureReason,
+      certExpiresAt: result.certExpiresAt, // ISC-40: ssl monitors only, undefined for everything else
       checkedAt: result.checkedAt,
     });
 
